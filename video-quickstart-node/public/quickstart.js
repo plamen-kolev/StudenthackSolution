@@ -72,7 +72,7 @@ function startRecordingClientAudio() {
 
             mediaRecorder.onstop = function (e) {
                 console.log("data available after MediaRecorder.stop() called.");
-                blob = new Blob(chunks, {'type': 'audio/ogg; codecs=opus'});
+                blob = new Blob(chunks, {'type': 'audio/x-wav;'});
                 chunks = [];
                 blobToBase64(blob);
             };
