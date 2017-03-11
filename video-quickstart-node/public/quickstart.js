@@ -57,11 +57,16 @@ function startRecordingClientAudio() {
     if (navigator.getUserMedia) {
         console.log('getUserMedia supported.');
 
-        var constraints = {audio: true};
+        var constraints = {audio: true , video: false};
         var chunks = [];
 
         var onSuccess = function(stream) {
-            mediaRecorder = new MediaRecorder(stream);
+            var options = {
+                audioBitsPerSecond : 128000,
+                mimeType : 'audio/webm\;codecs=opus'
+            };
+            mediaRecorder = new MediaRecorder(stream,options);
+
             mediaRecorder.start();
             console.log(mediaRecorder.state);
             console.log("recorder started");
@@ -72,7 +77,8 @@ function startRecordingClientAudio() {
 
             mediaRecorder.onstop = function (e) {
                 console.log("data available after MediaRecorder.stop() called.");
-                blob = new Blob(chunks, {'type': 'audio/x-wav;'});
+                blob = chunks[0];
+                console.log(chunks);
                 chunks = [];
                 blobToBase64(blob);
             };

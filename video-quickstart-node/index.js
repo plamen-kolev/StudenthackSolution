@@ -68,10 +68,10 @@ app.get('/token', function (request, response) {
 
 var fs = require('fs');
 app.post('/save_recording', function (req, res) {
-    var fileName = uuidV4() + '.wav';
+    var fileName = uuidV4() + '.ogg';
     var voiceRecording = new VoiceRecording();
     voiceRecording.set("sessionId", req.body.conversationId);
-    voiceRecording.set("data", new Parse.File( fileName,{ base64: req.body.blob } , "wav" ) );
+    voiceRecording.set("data", new Parse.File( fileName,{ base64: req.body.blob } ) );
     voiceRecording.set("startDateTimeStamp" , new Date(req.body.startRecordDate));
 
     voiceRecording.save(null, {
