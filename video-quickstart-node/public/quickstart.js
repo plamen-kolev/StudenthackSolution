@@ -13,9 +13,9 @@ if (!navigator.webkitGetUserMedia && !navigator.mozGetUserMedia) {
 // from the room, if joined.
 window.addEventListener('beforeunload', leaveRoomIfJoined);
 
+var conversationId;
 $.getJSON('/token', function (data) {
     identity = data.identity;
-
     // Create a Video Client and connect to Twilio
     videoClient = new Twilio.Video.Client(data.token);
     document.getElementById('room-controls').style.display = 'block';
@@ -90,7 +90,7 @@ function startRecordingClientAudio() {
 
 //Send blob to api
 function sendToApi(base64) { // encode
-    var update = {'blob': base64};
+    var update = {'blob': base64, 'identifier': conversationId};
 
     $.ajax({
         type: "POST",
@@ -117,6 +117,7 @@ var blobToBase64 = function (blob) {
 // Successfully connected!
 function roomJoined(room) {
     activeRoom = room;
+    conversationId = activeRoom.sid;
 
     log("Joined as '" + identity + "'");
     document.getElementById('button-join').style.display = 'none';
@@ -135,6 +136,7 @@ function roomJoined(room) {
 
     room.participants.forEach(function (participant) {
         log("Already in Room: '" + participant.identity + "'");
+
         participant.media.attach('#remote-media');
     });
 

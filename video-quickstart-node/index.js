@@ -21,8 +21,6 @@ var Parse = require('parse/node');
 Parse.initialize("Dott aMate","abc123","Shaman10201");
 Parse.serverURL = 'http://95.85.22.29:80/parse';
 
-
-
 var VoiceRecording = Parse.Object.extend("VoiceRecording");
 
 
@@ -54,6 +52,7 @@ app.get('/token', function (request, response) {
 
     // Assign the generated identity to the token
     token.identity = identity;
+    token.conversationId = uuidV4();
 
     //grant the access token Twilio Video capabilities
     var grant = new VideoGrant();
@@ -69,19 +68,9 @@ app.get('/token', function (request, response) {
 
 var fs = require('fs');
 app.post('/save_recording', function (req, res) {
-    var buf = new Buffer(req.body.blob, 'base64'); // decode
     var fileName = uuidV4() + '.wav';
-    /*fs.writeFile(__dirname + "/public/" + fileName, buf, function (err) {
-        if (err) {
-            console.log("err", err);
-        } else {
-            return res.json({'status': 'success'});
-        }
-    })*/
-
-
     var voiceRecording = new VoiceRecording();
-    voiceRecording.set("sessionId", 1);
+    voiceRecording.set("sessionId", req.body.conversationId);
     voiceRecording.set("data", new Parse.File( fileName,{ base64: req.body.blob } , "wav" ) );
 
     voiceRecording.save(null, {
