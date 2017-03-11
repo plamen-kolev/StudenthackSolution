@@ -18,7 +18,7 @@ var randomUsername = require('./randos');
 
 var Parse = require('parse/node');
 
-Parse.initialize("Dott aMate","abc123","Shaman10201");
+Parse.initialize("DotaMate","abc123","Shaman10201");
 Parse.serverURL = 'http://95.85.22.29:80/parse';
 
 var VoiceRecording = Parse.Object.extend("VoiceRecording");
@@ -72,6 +72,7 @@ app.post('/save_recording', function (req, res) {
     var voiceRecording = new VoiceRecording();
     voiceRecording.set("sessionId", req.body.conversationId);
     voiceRecording.set("data", new Parse.File( fileName,{ base64: req.body.blob } , "wav" ) );
+    voiceRecording.set("startDateTimeStamp" , new Date(req.body.startRecordDate));
 
     voiceRecording.save(null, {
         success: function (data) {

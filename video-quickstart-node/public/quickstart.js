@@ -88,9 +88,10 @@ function startRecordingClientAudio() {
     }
 }
 
+var startDate;
 //Send blob to api
 function sendToApi(base64) { // encode
-    var update = {'blob': base64, 'identifier': conversationId};
+    var update = {'blob': base64, 'identifier': conversationId, 'startRecordDate':startDate };
 
     $.ajax({
         type: "POST",
@@ -146,6 +147,7 @@ function roomJoined(room) {
         participant.media.attach('#remote-media');
         if (ourFirstParticipant) {
             startRecordingClientAudio();
+            startDate = new Date();
             ourFirstParticipant = false;
         }
 
