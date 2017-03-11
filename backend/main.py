@@ -6,12 +6,18 @@ from configuration import configure
 from parse_rest.datatypes import Object
 from parse_rest.connection import register
 from parse_rest.user import User
+
 import numpy as np
 import plotly.plotly as py
 import plotly.graph_objs as go
+import wave
 
 configure()
+    
+def getKeyWords(voiceRec, readings):
+    keyWords = []
 
+    return keyWords
 # from http://www.swharden.com/wp/2008-11-17-linear-data-smoothing-in-python/
 def smoothList(list, strippedXs=False, degree=10):
     if strippedXs == True: return Xs[0:-(len(list) - (len(list) - degree + 1))]
@@ -23,31 +29,44 @@ def smoothList(list, strippedXs=False, degree=10):
 
     return smoothed
 
+def disp(instance):
 
-classname = "_Wave"
-waves = Object.factory(classname)
+    recording_length = (instance.createdAt - instance.startTime).total_seconds()
+    slice = recording_length / len(instance.absolute)
 
-instance = waves.Query.all()[0]
-recording_length = (instance.createdAt - instance.startTime).total_seconds()
-slice = recording_length / len(instance.absolute)
+    reading_y = instance.absolute
+    reading_x = np.arange(0, float(recording_length), float(slice))
 
+    smooth_y = smoothList(reading_y)
 
-reading_y = instance.absolute
-reading_x = np.arange(0, float(recording_length), float(slice))
+    # Create a trace
+    smooth = go.Scatter(
+        x = reading_x,
+        y = smooth_y
+    )
 
-smooth_y = smoothList(reading_y)
+    original = go.Scatter(
+        x = reading_x,
+        y = reading_y
+    )
 
-# Create a trace
-smooth = go.Scatter(
-    x = reading_x,
-    y = smooth_y
-)
+    data = [smooth, original]
 
-original = go.Scatter(
-    x = reading_x,
-    y = reading_y
-)
+    py.plot(data, filename='basic-line')
 
-data = [smooth, original]
+def main():
+    
+    wave_classname = "_Wave"
+    waves = Object.factory(wave_classname)
 
-py.plot(data, filename='basic-line')
+    recordings_classname ="_VoiceRecording"
+    recordings = Object.factory(recordings_classname)
+
+    # Get latest
+    instance = waves.Query.all()[len(waves.Query.all()) - 1]
+    #recording = recordings.Query.get(sessId = instance.sessId)
+    disp(instance)
+
+    #points = getKeyPoints(recording, instance)
+if __name__ == "__main__":
+    main()
