@@ -20,20 +20,19 @@ $.getJSON('/token', function (data) {
     videoClient = new Twilio.Video.Client(data.token);
     document.getElementById('room-controls').style.display = 'block';
 
-    // Bind button to join room
-    document.getElementById('button-join').onclick = function () {
-        roomName = document.getElementById('room-name').value;
-        if (roomName) {
-            log("Joining room '" + roomName + "'...");
 
-            videoClient.connect({to: roomName}).then(roomJoined,
-                function (error) {
-                    log('Could not connect to Twilio: ' + error.message);
-                });
-        } else {
-            alert('Please enter a room name.');
-        }
-    };
+    roomName = 'testgroup';
+    if (roomName) {
+        log("Joining room '" + roomName + "'...");
+
+        videoClient.connect({to: roomName}).then(roomJoined,
+            function (error) {
+                log('Could not connect to Twilio: ' + error.message);
+            });
+    } else {
+        alert('Please enter a room name.');
+    }
+
 
     // Bind button to leave room
     document.getElementById('button-leave').onclick = function () {

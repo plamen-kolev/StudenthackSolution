@@ -1,4 +1,4 @@
-import os, plotly
+import os
 os.environ["PARSE_API_ROOT"] = "http://95.85.22.29/parse"
 
 # Everything else same as usual
@@ -30,7 +30,7 @@ def calculate():
     
     if request.method == 'POST':
         
-        wave_classname = "_Wave"
+        wave_classname = "Wave"
         waves = Object.factory(wave_classname)
         recordings_classname ="_VoiceRecording"
         recordings = Object.factory(recordings_classname)
