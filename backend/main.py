@@ -29,16 +29,15 @@ keyWordStore = {}
 def calculate():
     
     if request.method == 'POST':
-        session_id = request.form["sessionId"]
+        
         wave_classname = "_Wave"
         waves = Object.factory(wave_classname)
-
         recordings_classname ="_VoiceRecording"
         recordings = Object.factory(recordings_classname)
 
         # Get latest
-        brainWaveInstance = waves.Query.get(session_id = sessionId)
-        recording = recordings.Query.get(session_id = sessionId)
+        alphaBrainWaveInstance = waves.Query.get(sessionId = sessionId, type = "alpha")
+        recording = recordings.Query.get(sessionId = sessionId)
 
         # Fetch file
         response = urllib2.urlopen(recording.data.url.replace("https", "http", 1))
@@ -51,19 +50,14 @@ def calculate():
                 out.write(audioFile) 
             
         process = call("/usr/bin/ffmpeg -y -i  " + recFilename + ".ogg " +  recFilename +  ".wav", shell = True)
-
         # Size of the reading slice in seconds
         sliceSize = 3
-
-        maxKeyPoints, minKeyPoints = getKeyPoints(brainWaveInstance)
-
+        maxKeyPoints, minKeyPoints = getKeyPoints(alphaBrainWaveInstance, sliceSize)
         maxKeyWords = getKeyWords(recFilename + ".wav", maxKeyPoints, sliceSize)
         minKeyWords = getKeyWords(recFilename + ".wav", minKeyPoints, sliceSize)
-        pdb.set_trace()
-        keyWordStore[session_id] = {maxKeyWords, minKeyWords}
+        keyWordStore[sessionId] = [maxKeyWords, minKeyWords]    
 
-        
-    #recognize(recFilename + ".wav")
+        #recognize(recFilename + ".wav")
 
 @app.route("/getresult", methods=['POST'])
 def getresult():
@@ -91,7 +85,7 @@ def getKeyPoints(readings, sliceSize):
 
         maxReadings[i/sliceSize] = sliceMax  
         minReadings[i/sliceSize] = sliceMin
-    return maxReadings, minReadings
+    return (maxReadings, minReadings)
 
 # from http://www.swharden.com/wp/2008-11-17-linear-data-smoothing-in-python/
 def smoothList(list, strippedXs=False, degree=10):
@@ -187,11 +181,12 @@ def main():
         
     process = call("/usr/bin/ffmpeg -y -i  " + recFilename + ".ogg " +  recFilename +  ".wav", shell = True)
     # Size of the reading slice in seconds
-    sliceSize = 3
+    sliceSize = 5
     maxKeyPoints, minKeyPoints = getKeyPoints(alphaBrainWaveInstance, sliceSize)
     maxKeyWords = getKeyWords(recFilename + ".wav", maxKeyPoints, sliceSize)
     minKeyWords = getKeyWords(recFilename + ".wav", minKeyPoints, sliceSize)
     keyWordStore[sessionId] = [maxKeyWords, minKeyWords]    
     
 if __name__ == "__main__":
-    main()
+    #main()
+    print("done")
