@@ -16,6 +16,7 @@ from subprocess import call
 from base64 import decodestring
 from audio_transcribe import recognize
 import json
+import pdb
 
 configure()
 
@@ -26,6 +27,7 @@ keyWordStore = {}
 
 @app.route("/calculate", methods = ['POST'])
 def calculate():
+    
     if request.method == 'POST':
         session_id = request.form["sessionId"]
         wave_classname = "_Wave"
@@ -57,6 +59,7 @@ def calculate():
 
         maxKeyWords = getKeyWords(recFilename + ".wav", maxKeyPoints, sliceSize)
         minKeyWords = getKeyWords(recFilename + ".wav", minKeyPoints, sliceSize)
+        pdb.set_trace()
         keyWordStore[session_id] = {maxKeyWords, minKeyWords}
 
         
@@ -69,21 +72,25 @@ def getresult():
         return json.dumps(keyWordStore[session_id])
         
 
-def getKeyPoints(readings):
+def getKeyPoints(readings, sliceSize):
     # Assume that voice recording is longer than readings time
+
     recording_length = (readings.createdAt -readings.startTime).total_seconds()
-    slice = len(readings.absolute) / recording_length
+
+    readingsPerS = int(len(readings.absolute) / recording_length)  
+
     maxReadings = {}
     minReadings = {}
 
-    for i in xrange(0,int(recording_length), int(3*slice)):
+    for i in xrange(0,int(recording_length), int(sliceSize)):
         sliceMax = -1.5
         sliceMin = 1.5
-        for j in xrange(i, i * 2 - 1):
+        for j in xrange(i, (i * 2) - 1):
             sliceMax = max(sliceMax, readings.absolute[j])
             sliceMin = min(sliceMin, readings.absolute[i])
-        maxReadings[i/slice] = sliceMax  
-        minReadings[i/slice] = sliceMin
+
+        maxReadings[i/sliceSize] = sliceMax  
+        minReadings[i/sliceSize] = sliceMin
     return maxReadings, minReadings
 
 # from http://www.swharden.com/wp/2008-11-17-linear-data-smoothing-in-python/
@@ -125,19 +132,24 @@ def disp(instance):
 def getKeyWords(audioFilename, readings, sliceSize):
     
     keyWords = {}
-    
+
+    voiceRec = wave.open(audioFilename,'rb')
+    frameRate = voiceRec.getframerate()
+    length = voiceRec.getnframes() / frameRate
+    pdb.set_trace()
     for sliceNum in readings: 
-        voiceRec = wave.open(audioFilename,'rb')
+
         # Calculate cut points
-        frameRate = voiceRec.getframerate()
         startFrame = frameRate * sliceNum * sliceSize
         endFrame = startFrame + frameRate * sliceSize
         print ("Slice ", sliceNum, " startFrame", startFrame, " endFrame", endFrame)
+
         # Cut inital audio
         segmentName = "segment_tmp.wav"
         audioSegment = wave.open(segmentName,"wb")
+
         voiceRec.readframes(startFrame)
-        frames = voiceRec.readframes(endFrame - startFrame)
+        frames = voiceRec.readframes(int(endFrame - startFrame))
 
         # Write segment to disk
         audioSegment.setparams(voiceRec.getparams())
@@ -147,6 +159,39 @@ def getKeyWords(audioFilename, readings, sliceSize):
         # Recognize segment
         recognizedText = recognize(segmentName)
         keyWords[recognizedText] = readings[sliceNum]
-        voiceRec.close()
+        voiceRec.rewind()
+    voiceRec.close()
 
     return keyWords
+
+def main():
+    sessionId = "RM96da4ad1b4f1e48fc1458e5e6a492073"
+    wave_classname = "_Wave"
+    waves = Object.factory(wave_classname)
+    recordings_classname ="_VoiceRecording"
+    recordings = Object.factory(recordings_classname)
+
+    # Get latest
+    alphaBrainWaveInstance = waves.Query.get(sessionId = sessionId, type = "alpha")
+    recording = recordings.Query.get(sessionId = sessionId)
+
+    # Fetch file
+    response = urllib2.urlopen(recording.data.url.replace("https", "http", 1))
+    print("url", recording.data.url.replace("https", "http", 1))
+    audioFile = response.read()
+    print("TYPE ", type(audioFile))
+
+    # Write downloaded file to disk
+    with open(recFilename + ".ogg", 'wb') as out: 
+            out.write(audioFile) 
+        
+    process = call("/usr/bin/ffmpeg -y -i  " + recFilename + ".ogg " +  recFilename +  ".wav", shell = True)
+    # Size of the reading slice in seconds
+    sliceSize = 3
+    maxKeyPoints, minKeyPoints = getKeyPoints(alphaBrainWaveInstance, sliceSize)
+    maxKeyWords = getKeyWords(recFilename + ".wav", maxKeyPoints, sliceSize)
+    minKeyWords = getKeyWords(recFilename + ".wav", minKeyPoints, sliceSize)
+    keyWordStore[sessionId] = [maxKeyWords, minKeyWords]    
+    
+if __name__ == "__main__":
+    main()
