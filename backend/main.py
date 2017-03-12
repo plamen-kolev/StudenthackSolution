@@ -15,8 +15,7 @@ import wave
 from subprocess import call
 from base64 import decodestring
 from audio_transcribe import recognize
-import json
-import pdb
+import json 
 
 configure()
 
@@ -29,7 +28,7 @@ keyWordStore = {}
 def calculate():
     
     if request.method == 'POST':
-        
+        sessionId = request.form["sessionId"]
         wave_classname = "_Wave"
         waves = Object.factory(wave_classname)
         recordings_classname ="_VoiceRecording"
@@ -56,7 +55,8 @@ def calculate():
         maxKeyWords = getKeyWords(recFilename + ".wav", maxKeyPoints, sliceSize)
         minKeyWords = getKeyWords(recFilename + ".wav", minKeyPoints, sliceSize)
         keyWordStore[sessionId] = [maxKeyWords, minKeyWords]    
-
+        
+        return keyWordStore[sessionId]
         #recognize(recFilename + ".wav")
 
 @app.route("/getresult", methods=['POST'])
@@ -129,8 +129,7 @@ def getKeyWords(audioFilename, readings, sliceSize):
 
     voiceRec = wave.open(audioFilename,'rb')
     frameRate = voiceRec.getframerate()
-    length = voiceRec.getnframes() / frameRate
-    pdb.set_trace()
+    length = voiceRec.getnframes() / frameRate 
     for sliceNum in readings: 
 
         # Calculate cut points
@@ -188,5 +187,5 @@ def main():
     keyWordStore[sessionId] = [maxKeyWords, minKeyWords]    
     
 if __name__ == "__main__":
-    #main()
+    main()
     print("done")
