@@ -7,3 +7,6 @@ class User(Object):
 
 class Wave(Object):
     pass
+
+class Buzzwords(Object):
+    

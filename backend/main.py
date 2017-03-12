@@ -15,18 +15,20 @@ import wave
 from subprocess import call
 from base64 import decodestring
 from audio_transcribe import recognize
+from flask_cors import CORS, cross_origin
 import json 
 
 configure()
 
 app = Flask(__name__)
+CORS(app)
 recFilename = 'voice_tmp'
 
 keyWordStore = {}
 
 @app.route("/calculate", methods = ['POST'])
 def calculate():
-    
+    print("calc")
     if request.method == 'POST':
         sessionId = request.form["sessionId"]
         wave_classname = "_Wave"
@@ -53,8 +55,8 @@ def calculate():
         sliceSize = 3
         maxKeyPoints, minKeyPoints = getKeyPoints(alphaBrainWaveInstance, sliceSize)
 
-        maxKeyWords = getKeyWords(recFilename + ".wav", maxKeyPoints, sliceSize)
-        minKeyWords = getKeyWords(recFilename + ".wav", minKeyPoints, sliceSize)
+        maxKeyWords = getKeyWords(recFilename + ".wav", maxKeyPoints, sliceSize, sessionId)
+        minKeyWords = getKeyWords(recFilename + ".wav", minKeyPoints, sliceSize, sessionId)
         
         keyWordStore[sessionId] = [maxKeyWords, minKeyWords, alphaBrainWaveInstance]    
 
@@ -67,6 +69,7 @@ def calculate():
 
 @app.route("/getresult", methods=['POST'])
 def getresult():
+    print("calc")   
     if request.method == 'POST':
         session_id = request.form["sessionId"]
         return json.dumps(keyWordStore[session_id])
@@ -129,7 +132,7 @@ def disp(instance):
 
     py.plot(data, filename='basic-line')
 
-def getKeyWords(audioFilename, readings, sliceSize):
+def getKeyWords(audioFilename, readings, sliceSize, sessionId):
     
     keyWords = {}
 
@@ -159,6 +162,8 @@ def getKeyWords(audioFilename, readings, sliceSize):
         # Recognize segment
         recognizedText = recognize(segmentName)
         keyWords[recognizedText] = readings[sliceNum]
+        buzzword = Buzzwords(words = recognizedText, startTime = sliceNum * sliceSize, endTime = (sliceNum + 1) * sliceSize, sessionId = sessionId)
+        buzzword.save()
         voiceRec.rewind()
     voiceRec.close()
 
