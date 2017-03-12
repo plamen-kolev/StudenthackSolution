@@ -105,6 +105,9 @@ function sendToApi(base64) { // encode
         success: function (new_recording) {
             console.log("success");
         },
+        error: function(e) {
+            console.log(e)
+        },
         dataType: 'application/json'
     });
 }
@@ -207,15 +210,26 @@ function roomJoined(room) {
         log("Participant '" + participant.identity + "' left the room");
         participant.media.detach();
         mediaRecorder.stop();
-        $.ajax({
-            type: "POST",
-            url: 'localhost:5000/calculate',
-            data: 'sessionId:' + conversationId,
-            success: function (data) {
-                displayResult(data);
+
+        $('#input-name').val(conversationId);
+        var form = $('#magic-form')
+
+        setTimeout(function(){
+            $.ajax({
+            "crossDomain": true,
+            "url": "http://ec2-34-249-81-34.eu-west-1.compute.amazonaws.com:5000/calculate",
+            "method": "POST",
+            "mimeType": "multipart/form-data",
+            "data": form.serialize(),
+            "success":function(response){
+                displayResult(response);
+                console.log(response)
             },
-            dataType: dataType
+            "error": function(error) {
+                console.log(error)
+            }
         });
+        }, 5000);    
     });
 
     // When we are disconnected, stop capturing local video

@@ -70,7 +70,7 @@ var fs = require('fs');
 app.post('/save_recording', function (req, res) {
     var fileName = uuidV4() + '.ogg';
     var voiceRecording = new VoiceRecording();
-    voiceRecording.set("sessionId", req.body.conversationId);
+    voiceRecording.set("sessionId", req.body.identifier);
     voiceRecording.set("data", new Parse.File( fileName,{ base64: req.body.blob } ) );
     voiceRecording.set("startDateTimeStamp" , new Date(req.body.startRecordDate));
 
