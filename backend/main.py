@@ -61,7 +61,6 @@ def calculate():
         jsonObj = {}
         jsonObj["maxKeyWords"] = maxKeyWords
         jsonObj["minKeyWords"] = minKeyWords
-        jsonObj["waveReadings"] = alphaBrainWaveInstance
 
         return json.dumps(jsonObj)
         #recognize(recFilename + ".wav")
