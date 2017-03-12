@@ -121,6 +121,8 @@ var blobToBase64 = function (blob) {
 };
 
 function displayResult(data) {
+    data = {"maxKeyWords": {"i could really thought whoa": 0.09301596961149095, "i have a go to the key sure": 0.08360229583493889, "we should not let the": 0.1005189399827451, "what is would have totally": 0.09301596961149095, "i had little one was quite clear": 0.09301596961149095, "if all of them were to": -1.5, "human flesh in iowa and his life who castle": 0.1005189399827451, "null": 0.09301596961149095, "i think what the": 0.09301596961149095, "or why i'm eight feet footman": 0.09313474129273151, "did that request or": 0.09301596961149095, "the auto and how it and": 0.09301596961149095}, "minKeyWords": {"i could really thought whoa": 0.09301596961149095, "i have a go to the key sure": 0.08360229583493889, "we should not let the": 0.09792122461140894, "what is would have totally": 0.09301596961149095, "i had little one was quite clear": 0.09301596961149095, "if all of them were to": 1.5, "human flesh in iowa and his life who castle": 0.08360229583493889, "null": 0.09301596961149095, "i think what the": 0.09301596961149095, "or why i'm eight feet footman": 0.09313474129273151, "did that request or": 0.086654682436073, "the auto and how it and": 0.09301596961149095}}
+
     /* {"maxKeyWords": {"i could really thought whoa": 0.09301596961149095, "i have a go to the key sure": 0.08360229583493889, "we should not let the": 0.1005189399827451, "what is would have totally": 0.09301596961149095, "i had little one was quite clear": 0.09301596961149095, "if all of them were to": -1.5, "human flesh in iowa and his life who castle": 0.1005189399827451, "null": 0.09301596961149095, "i think what the": 0.09301596961149095, "or why i'm eight feet footman": 0.09313474129273151, "did that request or": 0.09301596961149095, "the auto and how it and": 0.09301596961149095}, "minKeyWords": {"i could really thought whoa": 0.09301596961149095, "i have a go to the key sure": 0.08360229583493889, "we should not let the": 0.09792122461140894, "what is would have totally": 0.09301596961149095, "i had little one was quite clear": 0.09301596961149095, "if all of them were to": 1.5, "human flesh in iowa and his life who castle": 0.08360229583493889, "null": 0.09301596961149095, "i think what the": 0.09301596961149095, "or why i'm eight feet footman": 0.09313474129273151, "did that request or": 0.086654682436073, "the auto and how it and": 0.09301596961149095}} */
     var maxKeyWords = data['maxKeyWords'];
     var minKeyWords = data['minKeyWords'];
@@ -144,11 +146,20 @@ function displayResult(data) {
 
     deltaKeys.sort(compareNumbers);
 
+//    deltaKeys.forEach(function(element){
+//        console.log(element);
+//        var max = maxKeyWords[element]
+//        var min = minKeyWords[element]
+//        var words = element
+//
+//    })
     for (i = 0; i < deltaKeys.length; i++) {
         var currentKey = deltaToKey[deltaKeys[i]];
         var max = maxKeyWords[currentKey];
         var min = minKeyWords[currentKey];
+        $('#readings').append("Max: " + max + " min: " + min + " word: " + currentKey);
     }
+
 
 }
 
