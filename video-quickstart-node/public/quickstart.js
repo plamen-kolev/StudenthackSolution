@@ -157,7 +157,8 @@ function displayResult(data) {
         var currentKey = deltaToKey[deltaKeys[i]];
         var max = maxKeyWords[currentKey];
         var min = minKeyWords[currentKey];
-        $('#readings').append("Max: " + max + " min: " + min + " word: " + currentKey);
+        console.log(currentKey);
+        $('#readings').append("<p'>Max: " + max + " min: " + min + " word: " + currentKey + "</p>");
     }
 
 
