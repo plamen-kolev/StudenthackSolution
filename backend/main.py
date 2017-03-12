@@ -135,6 +135,7 @@ def getKeyWords(audioFilename, readings, sliceSize):
 
     voiceRec = wave.open(audioFilename,'rb')
     frameRate = voiceRec.getframerate()
+
     length = voiceRec.getnframes() / frameRate 
     for sliceNum in readings: 
 

@@ -1,17 +1,27 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Buzzwords - Comunication</title>
-  <link rel="stylesheet" href="site.css">
-  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <title>Buzzwords - Comunication</title>
+    <link rel="stylesheet" href="site.css">
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
 </head>
 <body>
-  <div id="remote-media"></div>
-  <div id="controls">
-    <div class="col-md-12 videostuff" id="preview">
-      <div id="local-media"></div>
-      <button id="button-preview">Preview My Camera</button>
+<div id="video-content">
+    <div id="remote-media"></div>
+    <div id="controls">
+        <div class="col-md-12 videostuff" id="preview">
+            <div id="local-media"></div>
+            <button id="button-preview">Preview My Camera</button>
+        </div>
+        <div class="col-md-12 hidden" id="room-controls">
+            <p class="instructions">Room Name:</p>
+            <input id="room-name" type="text" placeholder="Enter a room name"/>
+            <button id="button-join">Join Room</button>
+            <button id="button-leave">Leave Room</button>
+        </div>
+        <div class="col-md-12" id="log"></div>
     </div>
+
     <div class="col-md-12 hidden" id="room-controls">
       <p class="instructions">Room Name:</p>
       <input id="room-name" type="text" placeholder="Enter a room name" />
