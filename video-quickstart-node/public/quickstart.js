@@ -120,6 +120,38 @@ var blobToBase64 = function (blob) {
     reader.readAsDataURL(blob);
 };
 
+function displayResult(data) {
+    /* {"maxKeyWords": {"i could really thought whoa": 0.09301596961149095, "i have a go to the key sure": 0.08360229583493889, "we should not let the": 0.1005189399827451, "what is would have totally": 0.09301596961149095, "i had little one was quite clear": 0.09301596961149095, "if all of them were to": -1.5, "human flesh in iowa and his life who castle": 0.1005189399827451, "null": 0.09301596961149095, "i think what the": 0.09301596961149095, "or why i'm eight feet footman": 0.09313474129273151, "did that request or": 0.09301596961149095, "the auto and how it and": 0.09301596961149095}, "minKeyWords": {"i could really thought whoa": 0.09301596961149095, "i have a go to the key sure": 0.08360229583493889, "we should not let the": 0.09792122461140894, "what is would have totally": 0.09301596961149095, "i had little one was quite clear": 0.09301596961149095, "if all of them were to": 1.5, "human flesh in iowa and his life who castle": 0.08360229583493889, "null": 0.09301596961149095, "i think what the": 0.09301596961149095, "or why i'm eight feet footman": 0.09313474129273151, "did that request or": 0.086654682436073, "the auto and how it and": 0.09301596961149095}} */
+    var maxKeyWords = data['maxKeyWords'];
+    var minKeyWords = data['minKeyWords'];
+    var keys = Object.keys(data['maxKeyWords']);
+
+    var deltaToKey = {};
+
+    keys.forEach(function(element) {
+        if (element) {
+            var delta = Math.abs(maxKeyWords[element] - minKeyWords[element]);
+            deltaToKey[delta] = element;
+        }
+    });
+
+    var deltaKeys = Object.keys(deltaToKey);
+
+    function compareNumbers(a, b)
+    {
+        return a - b;
+    }
+
+    deltaKeys.sort(compareNumbers);
+
+    for (i = 0; i < deltaKeys.length; i++) {
+        var currentKey = deltaToKey[deltaKeys[i]];
+        var max = maxKeyWords[currentKey];
+        var min = minKeyWords[currentKey];
+    }
+
+}
+
 // Successfully connected!
 function roomJoined(room) {
     activeRoom = room;
@@ -163,6 +195,15 @@ function roomJoined(room) {
         log("Participant '" + participant.identity + "' left the room");
         participant.media.detach();
         mediaRecorder.stop();
+        $.ajax({
+            type: "POST",
+            url: 'localhost:5000/calculate',
+            data: 'sessionId:' + conversationId,
+            success: function (data) {
+                displayResult(data);
+            },
+            dataType: dataType
+        });
     });
 
     // When we are disconnected, stop capturing local video
