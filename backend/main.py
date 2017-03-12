@@ -1,4 +1,4 @@
-import os, plotly
+import os
 os.environ["PARSE_API_ROOT"] = "http://95.85.22.29/parse"
 
 # Everything else same as usual
@@ -194,5 +194,5 @@ def main():
     keyWordStore[sessionId] = [maxKeyWords, minKeyWords]    
     
 if __name__ == "__main__":
-    main()
+    #main()
     print("done")
