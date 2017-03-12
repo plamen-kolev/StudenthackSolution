@@ -33,14 +33,9 @@ div#controls {
   margin: 0 auto;
 }
 
-  div#controls div {
-    float: left;
-  }
-
     div#controls div#room-controls,
     div#controls div#preview {
-      width: 16em;
-      margin: 0 1.5em;
+
       text-align: center;
     }
 
@@ -51,6 +46,7 @@ div#controls {
     font-style: oblique;
     font-size: 1.25em;
     color: #777776;
+    margin-top: 19px;
   }
 
   div#controls button {
@@ -114,7 +110,7 @@ div#controls {
     }
 
     div#controls div#room-controls button {
-      color: #fff;
+      color: #333;
       background: 0 0;
       border: 1px solid #686865;
     }
@@ -124,12 +120,12 @@ div#controls {
     }
 
   div#controls div#log {
-    width: 35%;
     height: 9.5em;
     margin-top: 2.75em;
     text-align: left;
     padding: 1.5em;
     float: right;
+    width:100%;
     overflow-y: scroll;
   }
 
@@ -142,3 +138,10 @@ div#controls {
       text-indent: -1.25em;
       width: 90%;
     }
+
+.videostuff{
+        background: #37cd96;
+    padding-bottom: 26px;
+    padding-top: 26px;
+    background: #37cd96;
+}
