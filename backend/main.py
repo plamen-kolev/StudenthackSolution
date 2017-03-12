@@ -10,42 +10,81 @@ from parse_rest.user import User
 from math import log
 import urllib2
 import numpy as np
-import plotly.plotly as py
-import plotly.graph_objs as go
-import soundfile      
+from flask import Flask, request  
 import wave
+from subprocess import call
 from base64 import decodestring
 from audio_transcribe import recognize
+import json
 
 configure()
-    
-def getKeyPoints(voiceRec, readings):
+
+app = Flask(__name__)
+recFilename = 'voice_tmp'
+
+keyWordStore = {}
+
+@app.route("/calculate", methods = ['POST'])
+def calculate():
+    if request.method == 'POST':
+        session_id = request.form["sessionId"]
+        wave_classname = "_Wave"
+        waves = Object.factory(wave_classname)
+
+        recordings_classname ="_VoiceRecording"
+        recordings = Object.factory(recordings_classname)
+
+        # Get latest
+        brainWaveInstance = waves.Query.get(session_id = sessionId)
+        recording = recordings.Query.get(session_id = sessionId)
+
+        # Fetch file
+        response = urllib2.urlopen(recording.data.url.replace("https", "http", 1))
+        print("url", recording.data.url.replace("https", "http", 1))
+        audioFile = response.read()
+        print("TYPE ", type(audioFile))
+
+        # Write downloaded file to disk
+        with open(recFilename + ".ogg", 'wb') as out: 
+                out.write(audioFile) 
+            
+        process = call("/usr/bin/ffmpeg -y -i  " + recFilename + ".ogg " +  recFilename +  ".wav", shell = True)
+
+        # Size of the reading slice in seconds
+        sliceSize = 3
+
+        maxKeyPoints, minKeyPoints = getKeyPoints(brainWaveInstance)
+
+        maxKeyWords = getKeyWords(recFilename + ".wav", maxKeyPoints, sliceSize)
+        minKeyWords = getKeyWords(recFilename + ".wav", minKeyPoints, sliceSize)
+        keyWordStore[session_id] = {maxKeyWords, minKeyWords}
+
+        
+    #recognize(recFilename + ".wav")
+
+@app.route("/getresult", methods=['POST'])
+def getresult():
+    if request.method == 'POST':
+        session_id = request.form["sessionId"]
+        return json.dumps(keyWordStore[session_id])
+        
+
+def getKeyPoints(readings):
     # Assume that voice recording is longer than readings time
     recording_length = (readings.createdAt -readings.startTime).total_seconds()
-    slice = recording_length / len(readings.absolute)
+    slice = len(readings.absolute) / recording_length
     maxReadings = {}
     minReadings = {}
 
-    for i in xrange(0,recording_length, 3*slice):
+    for i in xrange(0,int(recording_length), int(3*slice)):
         sliceMax = -1.5
         sliceMin = 1.5
         for j in xrange(i, i * 2 - 1):
             sliceMax = max(sliceMax, readings.absolute[j])
             sliceMin = min(sliceMin, readings.absolute[i])
-        maxReadings[i/ slice] = sliceMax  
+        maxReadings[i/slice] = sliceMax  
         minReadings[i/slice] = sliceMin
     return maxReadings, minReadings
-
-def getKeyWords(maxReadings, minReadings, sliceSize, voiceRec):
-    keyWords = {}
-    for sliceN in maxReadings: 
-        wave.open(voiceRec,'rb')
-        startTime = sliceN * sliceSize * 3
-        endTime = startTime + sliceSize - 1
-        voiceRec.readframes(startTime)
-        audioSegment = voiceRec.readframes(endTime - startTime)
-
-
 
 # from http://www.swharden.com/wp/2008-11-17-linear-data-smoothing-in-python/
 def smoothList(list, strippedXs=False, degree=10):
@@ -82,26 +121,23 @@ def disp(instance):
     data = [smooth, original]
 
     py.plot(data, filename='basic-line')
-def bytes(n):
-    if n== 0:
-        return 1
-    return int(log(n,256)+1)
 
-def testCutting(audioFilename):
-    slice = 4
-    keyWords = {}
-    maxReadings = {1:2, 2:3, 3:4}
+def getKeyWords(audioFilename, readings, sliceSize):
     
-    for sliceN in maxReadings: 
+    keyWords = {}
+    
+    for sliceNum in readings: 
         voiceRec = wave.open(audioFilename,'rb')
         # Calculate cut points
-        startTime = sliceN * slice
-        endTime = startTime + slice - 1
+        frameRate = voiceRec.getframerate()
+        startFrame = frameRate * sliceNum * sliceSize
+        endFrame = startFrame + frameRate * sliceSize
+        print ("Slice ", sliceNum, " startFrame", startFrame, " endFrame", endFrame)
         # Cut inital audio
         segmentName = "segment_tmp.wav"
         audioSegment = wave.open(segmentName,"wb")
-        voiceRec.readframes(startTime)
-        frames = voiceRec.readframes(endTime - startTime)
+        voiceRec.readframes(startFrame)
+        frames = voiceRec.readframes(endFrame - startFrame)
 
         # Write segment to disk
         audioSegment.setparams(voiceRec.getparams())
@@ -110,45 +146,7 @@ def testCutting(audioFilename):
 
         # Recognize segment
         recognizedText = recognize(segmentName)
-        keyWords[recognizedText] = maxReadings[sliceN]
+        keyWords[recognizedText] = readings[sliceNum]
         voiceRec.close()
 
     return keyWords
-
-def main():
-    keyWords = testCutting("man1_wb.wav")
-
-    print(keyWords)
-
-    wave_classname = "_Wave"
-    waves = Object.factory(wave_classname)
-
-    recordings_classname ="_VoiceRecording"
-    recordings = Object.factory(recordings_classname)
-
-    # Get latest
-    instance = waves.Query.all()[0]
-    recFilename = 'voice_tmp.wav'
-    recording = recordings.Query.all()[0] 
-    #recording = recordings.Query.get(sessId = instance.sessId)
-
-    response = urllib2.urlopen(recording.data.url.replace("https", "http", 1))
-    print("url", recording.data.url.replace("https", "http", 1))
-    audioFile = response.read()
-    print("TYPE ", type(audioFile))
-    
-    # Write downloaded file to disk
-    with open(recFilename, 'wb') as out: 
-            out.write(audioFile)
-   # convertedFilename = "voice_tmpW.wav"
- 
-
-   # data, samplerate = soundfile.read(recFilename)
-    #soundfile.write(convertedFilename, data, samplerate)
-    #print(recognize(soundfile.read(recFilename)))
-    #disp(instance)
-
-    points = getKeyPoints(recording, instance)
-
-if __name__ == "__main__":
-    main()
