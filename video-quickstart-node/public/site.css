@@ -22,7 +22,6 @@ div#remote-media {
     border: 1px solid #272726;
     margin: 3em 2em;
     height: 70%;
-    max-width: 27% !important;
     background-color: #272726;
     background-repeat: no-repeat;
   }
@@ -144,4 +143,25 @@ div#controls {
     padding-bottom: 26px;
     padding-top: 26px;
     background: #37cd96;
+}
+
+.landing{
+    margin: auto;
+    text-align: center;
+    padding-top: 200px;
+}
+
+#enter_website{
+    font-size: 5em;
+    text-align: center;
+    background: #37cd96;
+    padding: 10px;
+    min-width: 225px;
+    display: inline-block;
+    color: white;
+    margin-top:100px;
+}
+
+.center{
+    text-align:center;
 }

@@ -15,8 +15,7 @@ import wave
 from subprocess import call
 from base64 import decodestring
 from audio_transcribe import recognize
-import json
-import pdb
+import json 
 
 configure()
 
@@ -29,8 +28,8 @@ keyWordStore = {}
 def calculate():
     
     if request.method == 'POST':
-        
-        wave_classname = "Wave"
+        sessionId = request.form["sessionId"]
+        wave_classname = "_Wave"
         waves = Object.factory(wave_classname)
         recordings_classname ="_VoiceRecording"
         recordings = Object.factory(recordings_classname)
@@ -53,10 +52,17 @@ def calculate():
         # Size of the reading slice in seconds
         sliceSize = 3
         maxKeyPoints, minKeyPoints = getKeyPoints(alphaBrainWaveInstance, sliceSize)
+
         maxKeyWords = getKeyWords(recFilename + ".wav", maxKeyPoints, sliceSize)
         minKeyWords = getKeyWords(recFilename + ".wav", minKeyPoints, sliceSize)
-        keyWordStore[sessionId] = [maxKeyWords, minKeyWords]    
+        
+        keyWordStore[sessionId] = [maxKeyWords, minKeyWords, alphaBrainWaveInstance]    
 
+        jsonObj = {}
+        jsonObj["maxKeyWords"] = maxKeyWords
+        jsonObj["minKeyWords"] = minKeyWords
+
+        return json.dumps(jsonObj)
         #recognize(recFilename + ".wav")
 
 @app.route("/getresult", methods=['POST'])
@@ -71,7 +77,7 @@ def getKeyPoints(readings, sliceSize):
 
     recording_length = (readings.createdAt -readings.startTime).total_seconds()
 
-    readingsPerS = int(len(readings.absolute) / recording_length)  
+    readingsPerS = int(len(readings.relative) / recording_length)  
 
     maxReadings = {}
     minReadings = {}
@@ -80,8 +86,8 @@ def getKeyPoints(readings, sliceSize):
         sliceMax = -1.5
         sliceMin = 1.5
         for j in xrange(i, (i * 2) - 1):
-            sliceMax = max(sliceMax, readings.absolute[j])
-            sliceMin = min(sliceMin, readings.absolute[i])
+            sliceMax = max(sliceMax, readings.relative[j])
+            sliceMin = min(sliceMin, readings.relative[i])
 
         maxReadings[i/sliceSize] = sliceMax  
         minReadings[i/sliceSize] = sliceMin
@@ -101,9 +107,9 @@ def smoothList(list, strippedXs=False, degree=10):
 def disp(instance):
 
     recording_length = (instance.createdAt - instance.startTime).total_seconds()
-    slice = recording_length / len(instance.absolute)
+    slice = recording_length / len(instance.relative)
     
-    reading_y = instance.absolute
+    reading_y = instance.relative
     reading_x = np.arange(0, float(recording_length), float(slice))
 
     smooth_y = smoothList(reading_y)
@@ -129,8 +135,7 @@ def getKeyWords(audioFilename, readings, sliceSize):
 
     voiceRec = wave.open(audioFilename,'rb')
     frameRate = voiceRec.getframerate()
-    length = voiceRec.getnframes() / frameRate
-    pdb.set_trace()
+    length = voiceRec.getnframes() / frameRate 
     for sliceNum in readings: 
 
         # Calculate cut points
