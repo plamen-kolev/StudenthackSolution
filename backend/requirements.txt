@@ -49,7 +49,7 @@ pyparsing==2.2.0
 python-apt==1.1.0b5
 python-debian==0.1.29
 pyxdg==0.25
-PyYAML==3.11
+PyYAML==5.4
 reportlab==3.3.0
 requests==2.10.0
 SecretStorage==2.3.1
