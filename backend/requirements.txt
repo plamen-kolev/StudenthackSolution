@@ -59,7 +59,7 @@ six==1.10.0
 ssh-import-id==5.6
 system-service==0.3
 systemd-python==232
-tensorflow==1.0.0
+tensorflow==2.5.0
 ubuntu-drivers-common==0.0.0
 ufw==0.35
 unattended-upgrades==0.1
