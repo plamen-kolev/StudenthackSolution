@@ -38,7 +38,7 @@ padme==1.1.1
 pexpect==4.2.0
 Pillow==3.3.1
 plainbox==0.25
-protobuf==3.2.0
+protobuf==3.15.0
 ptyprocess==0.5.1
 pyasn1==0.1.9
 pycrypto==2.6.1
