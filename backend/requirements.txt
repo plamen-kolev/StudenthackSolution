@@ -27,7 +27,7 @@ lazr.uri==1.0.3
 LibAppArmor==2.10.95
 louis==2.6.5
 lxml==3.6.4
-Mako==1.0.4
+Mako==1.2.2
 MarkupSafe==0.23
 numpy==1.12.0
 oauth==1.0.1
